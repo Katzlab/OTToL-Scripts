@@ -19,6 +19,7 @@ def makeDicts(x):
 			db =  line.split('\t')[2]
 			taxon =  line.split('\t')[3]
 			
+				
 			try:
 				childdict[parid].append(taxid)
 			except:
@@ -103,7 +104,12 @@ def findDups(x,iddict,linedict):
 def checktabs(x):
 	infile = open(x,'r').readlines()
 	outfile3 = open(x + '_problems','w')
+
 	for line in infile:
+		taxid =  line.split('\t')[0]
+		parid = line.split('\t')[1]
+		if taxid == parid:
+			outfile3.write('bad ids!: ' + line)
 		try:
 			x = line.split('\t')[7] # line doesn't have > 6 tabs
 			outfile3.write('line too long: ' + line)
