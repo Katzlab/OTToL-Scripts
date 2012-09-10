@@ -8,7 +8,7 @@ from Bio import Entrez
 Entrez.email = "jgrant@smith.edu"  #Change
 import re
 
-outfile = open('out','a')
+outfile = open('TNRS_out.txt','a')
 
 def makeDicts(x):
 	print 'Processing data....'
@@ -41,7 +41,10 @@ def getNCBIName(x,query,parDict, lineDict,taxDict):
 #If not found, taxon will need to be added to OTToL
 ###################################################
 	record = Entrez.read(Entrez.espell(term = query, db = 'taxonomy'))
-	record2 = Entrez.read(Entrez.esearch(term = record['CorrectedQuery'], db = 'taxonomy'))
+	try: 
+		record2 = Entrez.read(Entrez.esearch(term = record['CorrectedQuery'], db = 'taxonomy'))
+	except:
+		record2 = Entrez.read(Entrez.esearch(term = query, db = 'taxonomy'))
 	flag = 0
 	for taxid in record2['IdList']:
 	
@@ -52,7 +55,7 @@ def getNCBIName(x,query,parDict, lineDict,taxDict):
 			searchOTToL(x,record3[0]['ScientificName'],parDict, lineDict, taxDict)
 	if flag == 0:
 		print 'You need to add the taxon: ' + query + ' to OTToL'
-		out2 = open('taxa_to_add','a')
+		out2 = open('TNRS_taxa_to_add.txt','a')
 		out2.write(query + '\n')
 		out2.close()
 		
@@ -73,7 +76,7 @@ def searchOTToL(x,query,parDict, lineDict, taxDict):
 			#print line
 			if re.search('_hom',line.split('\t')[2]):
 				homtax = getHom(x,taxon,parDict, lineDict, taxDict)
-				outfile.write(homtax + ',' + lineDict[homtax].split('\t')[3] + ',' + lineDict[parDict[taxid]].split('\t')[3] + '\n')
+				outfile.write(homtax + ',' + lineDict[homtax].split('\t')[3] + ',' + lineDict[parDict[homtax]].split('\t')[3] + '\n')
 				return
 			else:
 				try:
@@ -101,7 +104,6 @@ def getHom(x, taxon,parDict, lineDict, taxDict):
 			print str(i) + ')' + lineDict[parDict[line.split('\t')[0]]].split('\t')[3]
 			homList.append((lineDict[parDict[line.split('\t')[0]]].split('\t')[3], line.split('\t')[0]))
 	q = input('Do you want the one that has one of these as a parent? (type in number next to your selection) ')
-	#try:
 	r = raw_input('you selected ' + homList[q - 1][0] + '. Is that right? (y/n) ')
 	if r == 'y':
 		return homList[q - 1][1]
